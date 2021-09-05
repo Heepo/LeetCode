@@ -60,7 +60,6 @@ public:
                 }
             }
         }
-        
         return res;
     }
     
@@ -88,7 +87,13 @@ public:
                 dp[start][end] = 0;
                 return false;
             } else {
-                return isPalindrome(s, start + 1, end - 1, dp);
+                if (isPalindrome(s, start + 1, end - 1, dp)) {
+                    dp[start][end] = 1;
+                    return true;
+                } else {
+                    dp[start][end] = 0;
+                    return false;
+                }
             }
         }
         
