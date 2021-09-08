@@ -2,6 +2,89 @@
 #include <random>
 #include <algorithm>
 using namespace std;
+// borrows implemented min_heap, while max heap is more suitable
+class MinHeap {
+public:
+    vector<int> min_heap;
+    
+    // builds a heap O(n)
+    MinHeap(vector<int>& data) {
+        this->min_heap = data;
+        for (int i = (this->min_heap.size() - 1) / 2; i >= 0; i--) {
+            this->heapify_down(i);
+        }
+    }
+    
+    // O(nlog(n))
+    vector<int> heap_sort() {
+        vector<int> res;
+        while (!this->min_heap.empty()) {
+            res.push_back(this->top());
+            this->pop();
+        }
+        return res;
+    }
+    
+    void push(int node) {
+        this->min_heap.push_back(node);
+        this->heapify_up(this->min_heap.size() - 1);
+    }
+    
+    int top() {
+        return this->min_heap.front();
+    }
+    
+    void pop() {
+        this->min_heap[0] = this->min_heap[this->min_heap.size() - 1];
+        this->min_heap.pop_back();
+        this->heapify_down(0);
+    }
+    
+    bool empty() {
+        return this->min_heap.empty();
+    }
+    
+private:
+    // O(log(n))
+    void heapify_up(int i) {
+        if (i == 0) {
+            return;
+        }
+        int parent = (i - 1) / 2;
+        if (this->min_heap[parent] > this->min_heap[i]) {
+            this->swap(parent, i);
+            heapify_up(parent);
+        }
+        
+        return;
+    }
+    
+    // O(log(n)), if the parent is larger than one of the children, then the parent goes down
+    void heapify_down(int i) {
+        int l = 2 * i + 1;
+        int r = 2 * i + 2;
+        if (l >= this->min_heap.size()) return;
+        if (r >= this->min_heap.size()) {
+            if (this->min_heap[l] < this->min_heap[i]) this->swap(i, l);
+            return;
+        }
+        
+        int min = (this->min_heap[l] < this->min_heap[r]) ? l : r;
+        if (this->min_heap[min] < this->min_heap[i]) {
+            this->swap(i, min);
+            heapify_down(min);
+        }
+        
+        return;
+    }
+    
+    void swap(int i, int j) {
+        int tmp = this->min_heap[i];
+        this->min_heap[i] = this->min_heap[j];
+        this->min_heap[j] = tmp;
+    }
+};
+
 class Solution {
 public:
     vector<int> sortArray(vector<int>& nums) {
@@ -9,57 +92,17 @@ public:
             return nums;
         }
         
-        mergeSort(nums, 0, nums.size());
-        std::shuffle(nums.begin(), nums.end(), nums); 
-        quickSort(nums, 0, nums.size() - 1);
-        return nums;
+        // mergeSort(nums, 0, nums.size());
+        // std::random_shuffle(nums.begin(), nums.end());
+        // quickSort(nums, 0, nums.size() - 1);
+        
+        // return nums;
+        
+        // here borrows the implemented min heap, while using the max heap is more straightforward
+        MinHeap q(nums);
+        return q.heap_sort();
     }
     
-    void mergeSort(vector<int>& nums, int left, int right) {
-        //std::cout << "right: " << right << " left: " << left << std::endl;
-        if (right - left <= 1) {
-            return;
-        }
-        
-        int mid = (right + left) / 2;
-        //std::cout << "mid: " << mid << std::endl;
-        // sort left & right
-        mergeSort(nums, left, mid);
-        mergeSort(nums, mid, right);
-        
-        // [2, 3] [0, 1, 2]
-        vector<int> merged;
-        int i = left;
-        int j = mid;
-        while (i < mid && j < right) {
-            //std::cout << "left: " << left << " mid: " << mid << " right: " << right << std::endl;
-            //std::cout << "i: " << i << " j: " << j << std::endl;
-            if (nums[i] > nums[j]) {
-                merged.push_back(nums[j]);
-                j++;
-            } else {
-                merged.push_back(nums[i]);
-                i++;
-            }
-        }
-        if (i < mid) {
-            for (int k = i; k < mid; k++) {
-                merged.push_back(nums[k]);
-            }
-        }
-        if (j < right) {
-            for (int k = j; k < right; k++) {
-                merged.push_back(nums[k]);
-            }
-        }
-        for (int k = 0; k < merged.size(); k++) {
-            nums[left + k] = merged[k];
-            //std::cout << "left + k: " << left + k << " merged[k]: " << merged[k] << std::endl;
-        }
-        
-        return;
-    }
-
     void quickSort(vector<int>& nums, int start, int end) {
         if (start >= end) {
             return;
@@ -101,5 +144,5 @@ public:
         nums[i] = nums[j];
         nums[j] = tmp;
         return;
-    }
+    }  
 };
