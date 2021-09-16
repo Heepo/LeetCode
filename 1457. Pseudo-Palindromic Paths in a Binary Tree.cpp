@@ -52,7 +52,7 @@ class Solution2 {
 public:
     
     // at most one number can occur odd number of times
-    // uses binary status to record the odd / even times appeared at the corresponding postions
+    // uses binary status to record the odd / even times appeared at the corresponding positions
     int pseudoPalindromicPaths (TreeNode* root) {
         if (!root) return 0;
         
@@ -64,7 +64,7 @@ public:
         status ^= (1 << cur->val);
         int ans = 0;
         if (!cur->left && !cur->right)
-            // one-bits means the position number appeared odd times
+            // one-bits mean the position numbers appeared odd times
             ans += __builtin_popcount(status) <= 1;
         ans += dfs(cur->left, status);
         ans += dfs(cur->right, status);
