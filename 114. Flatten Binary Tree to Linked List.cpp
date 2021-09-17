@@ -10,7 +10,7 @@ struct TreeNode {
 
 class Solution {
 public:
-    // T: O(nlogn) searching right most node of the left subtree will cost O(logn) for n nodes
+    // T: O(n) each node will be visited at most three times
     // S: O(1) only uses a pointer to store the right child which needs to be reallocated
     void flatten(TreeNode* root) {
         if (!root) return;
