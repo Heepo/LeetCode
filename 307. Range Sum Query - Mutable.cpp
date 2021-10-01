@@ -140,6 +140,7 @@ public:
 private:
     FenwickTree bit_;
     vector<int> nums_;
+    
 };
 
 /**
