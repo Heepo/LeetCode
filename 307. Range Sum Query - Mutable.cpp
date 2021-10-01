@@ -77,6 +77,71 @@ private:
     }
 };
 
+// FenwickTree, the same as BinaryIndexedTree(BIT)
+// build tree T: O(nlogn), S: O(n)
+// update one element T: O(logn)
+// query T: O(logn)
+class FenwickTree {
+public:
+    FenwickTree(vector<int>& nums): partial_sums(nums.size() + 1, 0) {
+        for (int i = 0; i < nums.size(); ++i) {
+            int j = i + 1;
+            while (j < partial_sums.size()) {
+                partial_sums[j] += nums[i];
+                j += lowBit(j);
+            } 
+        }
+    }
+    
+    void update(int index, int val) {
+        // std::cout << "update val: " << val;
+        ++index;
+        while (index < partial_sums.size()) {
+            // std::cout << " index: " << index << std::endl;
+            partial_sums[index] += val;
+            index += lowBit(index);
+        }
+    }
+    
+    int query(int index) {
+        ++index;
+        int sum = 0;
+        // std::cout << "index: " << index;
+        while (index > 0) {
+            sum += partial_sums[index];
+            index -= lowBit(index);
+        }
+        // std::cout << " sum: " << sum << std::endl;
+        
+        return sum;
+    }
+
+private:
+    vector<int> partial_sums;
+    
+    inline int lowBit(int x) {
+        return x & (-x);
+    }
+};
+
+class NumArray2 {
+public:
+    NumArray2(vector<int>& nums): bit_(nums), nums_(std::move(nums)) {}
+    
+    void update(int index, int val) {
+        bit_.update(index, val - nums_[index]);
+        nums_[index] = val;
+    }
+    
+    int sumRange(int left, int right) {
+        return bit_.query(right) - bit_.query(left - 1);
+    }
+
+private:
+    FenwickTree bit_;
+    vector<int> nums_;
+};
+
 /**
  * Your NumArray object will be instantiated and called as such:
  * NumArray* obj = new NumArray(nums);

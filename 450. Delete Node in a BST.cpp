@@ -41,6 +41,7 @@ public:
                 parent->left = new_root->right;
                 new_root->right = root->right;
             }
+            
             new_root->left = root->left;
         } else {
             if (!root->left)
