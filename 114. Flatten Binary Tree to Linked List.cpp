@@ -11,7 +11,7 @@ struct TreeNode {
 class Solution {
 public:
     // T: O(n) each node will be visited at most three times
-    // S: O(1) only uses a pointer to store the right child which needs to be reallocated
+    // S: O(1) only uses a pointer to store the right most node in the left subtree
     void flatten(TreeNode* root) {
         if (!root) return;
         if (!root->left && !root->right) return;
