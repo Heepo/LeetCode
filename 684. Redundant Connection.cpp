@@ -1,13 +1,13 @@
 #include <vector>
 using namespace std;
 
-// T: amortized O(n)
+// T: amortized O(n), O(nlog*n)
 class Union {
 public:
     // the given edges num is equal with the nodes num
     Union(int n) {
         parents = vector<int>(n+1, 0);
-        ranks = vector<int>(n+1, 0);
+        sizes = vector<int>(n+1, 1);
         
         for (int i = 0; i <= n; i++) parents[i] = i;
     }
@@ -33,28 +33,39 @@ public:
         return false;
     }
     
+    // low sizes cluster will be merged to large sizes cluster to reduce the update operations
     void merge(int u, int v) {
-        if (ranks[u] < ranks[v])
-            parents[u] = v;
-        else if (ranks[u] > ranks[v])
+        if (sizes[u] > sizes[v]) {
+            sizes[parents[v]] -= sizes[v];
             parents[v] = u;
-        else
-            // only place that append one node to be another's child
-            parents[u] = v;
-            ranks[u]++;
+            sizes[u] += sizes[v];
+            return;
+        }
+        
+        sizes[parents[u]] -= sizes[u];
+        parents[u] = v;
+        sizes[v] += sizes[u];
+        return;
     }
     
+    // lazily makes the tree as flat as possible
     // T: amortized O(1) (O(log*n))
     int find(int u) {
-        // path compression -> reduce the time cost of finding root
-        if (parents[u] != u) parents[u] = find(parents[u]);
+        // lazy path compression -> reduce the time cost of finding root
+        if (parents[u] != u) {
+            sizes[parents[u]] -= sizes[u];
+            int v = find(parents[u]);
+            sizes[v] += sizes[u];
+            parents[u] = v;
+        }
         return parents[u];
     }
 
 private:
     vector<int> parents;
-    // low rank node will be merged to high rank node's children to reduce the time cost of finding root
-    vector<int> ranks;
+    // small sizes node will be merged to large sizes node's children to reduce the time cost of finding root
+    // sizes represent the node counts of each subtree
+    vector<int> sizes;
 };
 
 class Solution {
