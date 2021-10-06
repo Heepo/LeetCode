@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <algorithm>
+#include <set>
 using namespace std;
 
 class MaxHeap {
@@ -170,4 +171,64 @@ private:
             return x < e.x;
         }
     };
+};
+
+// uses a line to sweep the events(entering or leaving) and keeps tracking the heights
+// for a entering event, adds the height
+// for a leaving event, removes the height
+// every time sweeps at x, all the events(same x), entering or leaving, the height changing will line up in a proper order
+// after a event happening at x finished, if the max height changes, adds it to the answer
+// key point 1: sorts the events in a delicate way
+// key point 2: uses an efficient data structure to add/remove events.
+// uses a AVL/BST(multiset which allows duplicated keys), T(add): O(logn), T(remove): O(logn), T(max): O(1)(the right most)
+// T: O(nlogn)
+// S: O(n)
+class Solution2 {
+public:
+    vector<vector<int>> getSkyline(vector<vector<int>>& buildings) {
+        // x, h
+        typedef std::pair<int, int> Event;
+        vector<Event> events;
+        for (auto building: buildings) {
+            events.push_back({building[0], building[2]});
+            // negative height means leaving
+            events.push_back({building[1], -building[2]});
+        }
+        
+        hs_.clear();
+        
+        // T: O(nlogn)
+        std::sort(events.begin(), events.end(), [](const Event& e1, const Event& e2){
+            if (e1.first == e2.first) return e1.second > e2.second;
+            return e1.first < e2.first;
+        });
+        
+        int max_height = 0;
+        vector<vector<int>> ans;
+        for (auto event: events) {
+            if (event.second > 0) hs_.insert(event.second);
+            // just removes one of them if there are multiple hs
+            else hs_.erase(hs_.find(abs(event.second)));
+            
+            if (hs_.empty() && max_height != 0) {
+                // just removed all the events
+                ans.push_back({event.first, 0});
+                max_height = 0;
+            } else if (max() != max_height) {
+                ans.push_back({event.first, max()});
+                max_height = max();
+            }
+        }
+        
+        return ans;
+    }
+    
+
+private:
+    multiset<int> hs_;
+    
+    int max() {
+        if (hs_.empty()) return 0;
+        return *hs_.rbegin();
+    }
 };
