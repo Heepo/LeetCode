@@ -232,3 +232,104 @@ private:
         return *hs_.rbegin();
     }
 };
+
+class SegmentTree {
+public:
+    SegmentTree():root_(new TreeNode()) {}
+    
+    vector<vector<int>> update(vector<vector<int>>& buildings) {
+        // T: O(nlogn) ~ O(n^2), each update needs to recursively build the tree
+        for (auto building: buildings)
+            update_(root_, building[0], building[1], building[2]);
+
+        vector<vector<int>> ans;
+        int prev_height = 0;
+        // T: O(n)
+        dfs_(root_, ans, prev_height);
+        
+        // a special case that last segment is extended to INT_MAX
+        if (ans.back()[1] != 0) ans.push_back({INT_MAX, 0});
+        
+        return ans;
+    }
+
+private:
+    struct TreeNode {
+        int start;
+        int mid; // split the range to two parts [start, mid) and [mid, end)
+        int end;
+        int height; // the height of full coverage on [start, end)
+        unique_ptr<TreeNode> left; // dynamicly creates nodes using smart pointer to avoid memory leak
+        unique_ptr<TreeNode> right;
+        
+        TreeNode():start(INT_MIN), mid(-1), end(INT_MAX), height(0), left(nullptr), right(nullptr) {};
+        TreeNode(int start, int end, int height):start(start), mid(-1), end(end), height(height), left(nullptr), right(nullptr) {};
+    };
+    
+    TreeNode* root_;
+    
+    // T: O(logn) ~ O(n), each update needs to recursively build the tree
+    // S: O(n)
+    void update_(TreeNode* cur, int start, int end, int height) {
+        // current node has been splitted
+        if (cur->mid != -1) {
+            if (end <= cur->mid) update_(cur->left.get(), start, end, height);
+            else if (start >= cur->mid) update_(cur->right.get(), start, end, height);
+            else {
+                if (cur->start == start && cur->end == end) {
+                    cur->height = max(cur->height, height);
+                }
+                update_(cur->left.get(), start, cur->mid, height);
+                update_(cur->right.get(), cur->mid, end, height);
+            }
+            
+            return;
+        }
+        
+        if (cur->start == start && cur->end == end) {
+            cur->height = max(cur->height, height);
+
+            return;
+        }
+        
+        // prefers to use start to split the range
+        if (start > cur->start) {
+            cur->mid = start;
+            cur->left.reset(new TreeNode(cur->start, start, cur->height));
+            cur->right.reset(new TreeNode(start, cur->end, cur->height));
+            update_(cur->right.get(), start, end, height);
+            
+            return;
+        }
+        
+        // end < cur->end && start == cur->start
+        cur->mid = end;
+        cur->left.reset(new TreeNode(cur->start, end, cur->height));
+        cur->right.reset(new TreeNode(end, cur->end, cur->height));
+        update_(cur->left.get(), start, end, height);
+        
+        return;
+    }
+    
+    void dfs_(TreeNode* curr, vector<vector<int>>& ans, int& prev_height) {
+        if (!curr) return;
+        if (!curr->left.get() && !curr->right.get() && curr->height != prev_height) {
+            ans.push_back({curr->start, curr->height});
+            prev_height = curr->height;
+        }
+        
+        dfs_(curr->left.get(), ans, prev_height);
+        dfs_(curr->right.get(), ans, prev_height);
+    }
+};
+
+// uses segment tree to save the merged ranges and outputs the ranges left point(excluding the -inf)
+// T: O(nlogn) ~ O(n^2)
+// S: O(n)
+class Solution3 {
+public:
+    vector<vector<int>> getSkyline(vector<vector<int>>& buildings) {
+        SegmentTree tree_;
+        return tree_.update(buildings);
+    }
+};
