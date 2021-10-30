@@ -29,7 +29,7 @@ private:
         
         dp[l][r] =  max(piles[l] - stoneGame_(piles, dp, l + 1, r),
                        piles[r] - stoneGame_(piles, dp, l, r - 1));
-                       
+
         return dp[l][r];
     }
 };
@@ -38,7 +38,7 @@ private:
 // Calculations start from the diagonals ascending
 // T: O(n^2)
 // S: O(n^2)
-class Solution {
+class Solution2 {
 public:
     bool stoneGame(vector<int>& piles) {
         vector<vector<int>> dp = vector<vector<int>>(piles.size(), vector<int>(piles.size(), -1));
@@ -54,6 +54,34 @@ public:
         }
         
         return dp[0][piles.size() - 1] > 0;
+    }
+    
+};
+
+// Non-recursive solution
+// Calculations start from the diagonals ascending
+// dp[i, j] = max(piles[i] - dp[i + 1, j], piles[j] - dp[i, j - 1])
+// reduces dp[i, j] tp dp[i] using rolling vector to save internal results
+// dp[i] saves the winning points from i to j++
+// next_round(dp[i]) <- max(piles[i] - dp[i + 1], piles[j] - dp[i])
+// T: O(n^2)
+// S: O(n)
+class Solution3 {
+public:
+    bool stoneGame(vector<int>& piles) {
+        vector<int> dp = vector<int>(piles.size(), -1);
+        
+        for (int interval = 0; interval < piles.size(); ++interval) {
+            for (int start = 0; start + interval < piles.size(); ++ start) {
+                if (interval == 0)
+                    dp[start]= piles[start];
+                else
+                    dp[start] = max(piles[start] - dp[start + 1],
+                                    piles[start + interval] - dp[start]);
+            }
+        }
+        
+        return dp[0] > 0;
     }
     
 };
