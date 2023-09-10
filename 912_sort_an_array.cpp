@@ -92,7 +92,7 @@ public:
             return nums;
         }
         
-        // mergeSort(nums, 0, nums.size());
+        // merge_sort(nums, 0, nums.size() - 1);
         // std::random_shuffle(nums.begin(), nums.end());
         // quickSort(nums, 0, nums.size() - 1);
         
@@ -138,11 +138,48 @@ public:
         
         return first_larger_index - 1;
     }
+
+    void merge_sort(vector<int>&nums, int l, int r) {
+        if (l >= r) return;
+        int mid = (l + r) / 2;
+        merge_sort(nums, l, mid);
+        merge_sort(nums, mid + 1, r);
+        // print_vector(nums);
+
+        combine(nums, l, mid, r);
+        // print_vector(nums);
+        return;
+    }
+
+    void combine(vector<int>&nums, int l, int mid, int r) {
+        int i = l;
+        int j = mid + 1;
+        vector<int> combined(r - l + 1, 0);
+        int k = 0;
+        while (i <= mid && j <= r) {
+            if (nums[i] <= nums[j]) combined[k++] = nums[i++];   
+            else combined[k++] = nums[j++];
+        }
+
+        while (i <= mid) combined[k++] = nums[i++];
+        while (j <= r) combined[k++] = nums[j++];
+
+        for (k = 0; k <= r - l; ++k) {
+            nums[l + k] = combined[k];
+        }
+
+        return;
+    }
     
     void swap(vector<int>& nums, int i, int j) {
         int tmp = nums[i];
         nums[i] = nums[j];
         nums[j] = tmp;
         return;
-    }  
+    }
+
+    void print_vector(vector<int>& nums) {
+        for (auto num: nums) std::cout << num << " ";
+        std::cout << std::endl;
+    }
 };
