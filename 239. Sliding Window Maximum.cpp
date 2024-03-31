@@ -66,8 +66,9 @@ public:
             while (!monotonic_indices.empty() && nums[monotonic_indices.back()] < nums[i]) monotonic_indices.pop_back();
             monotonic_indices.emplace_back(i);
 
+            if (i - k + 1 < 0) continue;
             // The sliding window has already formed a full window.
-            if (i - k + 1 >= 0) answer.emplace_back(nums[monotonic_indices.front()]);
+            answer.emplace_back(nums[monotonic_indices.front()]);
 
             // Examines the size of the sliding window.
             if (monotonic_indices.front() == i - k + 1) monotonic_indices.pop_front();
