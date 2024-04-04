@@ -7,8 +7,8 @@
 // DFS is usually faster at detecting cycles due to the pruning strategy that involve recording the visit status.
 class Solution {
 public:
-    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
-        if (numCourses <= 1 || prerequisites.empty()) return true;
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        vector<int> answer;
 
         // Builds the graph.
         vector<vector<int>> g(numCourses);
@@ -19,32 +19,35 @@ public:
         // `visit_status`: 0 means unvisited, 1 means visiting, and 2 means visited.
         vector<int> visit_status(numCourses);
         for (int i = 0; i < numCourses; ++i) {
-            if (_dfs(i, g, visit_status)) return false;
+            if (_dfs(i, g, visit_status, answer)) return vector<int>();
         }
 
-        return true;
+        // The courses that need to be learned first are added last.
+        std::reverse(answer.begin(), answer.end());
+        return answer;
     }
 
 private:
     // Returns true if a cycle is detected.
-    bool _dfs(const int& i, const vector<vector<int>>& g, vector<int>& visit_status) {
+    bool _dfs(const int& i, const vector<vector<int>>& g, vector<int>& visit_status, vector<int>& answer) {
         if (visit_status[i] == 2) return false;
         if (visit_status[i] == 1) return true;
 
         visit_status[i] = 1;
         for (const int& neighbour: g[i]) {
-            if (_dfs(neighbour, g, visit_status)) return true;
+            if (_dfs(neighbour, g, visit_status, answer)) return true;
         }
         visit_status[i] = 2;
+        answer.push_back(i);
         return false;
     }
 };
 
-// Topological sorting (Kanh's algorithm)
+// Topological sorting (kahn's algorithm)
 class Solution2 {
 public:
-    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
-        if (numCourses <= 1 || prerequisites.empty()) return true;
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        vector<int> answer;
 
         // Builds the graph and calculates the in-degrees.
         vector<vector<int>> g(numCourses);
@@ -77,7 +80,7 @@ public:
         }
 
         // Or checks if the in-degree of any node is not 0.
-        if (visited.size() < numCourses) return false;
-        return true;
+        if (visited.size() < numCourses) return {};
+        return visited;
     }
 };
